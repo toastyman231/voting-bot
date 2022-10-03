@@ -6,11 +6,13 @@ This is what I created. It's a little buggy, so feel free to contribute!
 # How to Use
 Simply run the following command:
 ```console:
-/create-vote <prompt> <option1> <option2> <option3> <option4>
+/create-vote <prompt> <timeout> <allow-multiple-votes> <option1> <option2> <option3> <option4>
 ```
-The prompt and first two options to vote on are mandatory, and the second two options are optional.
-Once the poll is generated, just click on a button to cast your vote.
-Currently you can only vote on each poll once, changing your vote is not supported.
+**Prompt**: The question users will be voting on. Mandatory.  
+**Timeout**: How long the poll will last for, in seconds. Mandatory.  
+**Allow Multiple Votes**: Set to true to allow users to vote multiple times. Mandatory.  
+**Option 1/2**: The first/second option to vote on. Mandatory.  
+**Option 3/4**: The second/third option to vote on. Optional.
 
 # How to Host Your Own Voting Bot
 1. Install node.js and npm. I recommend at least node version 16.x, as that is the only version I have confirmed it works on.
@@ -42,3 +44,12 @@ CLIENT_ID="Your client id here"
     3. Copy the generated link
 9. Go to the link you copied, and invite the bot to any servers you own/moderate.
 10. Enjoy!
+
+## Notes
+- Logs will be output into voting-bot-folder/logs/log.txt. If the directory or file does not exist, both will be created.
+- Currently all logs are dumped into one file. This may change in the future, but it is not currently planned.
+- Logs are currently output for:
+    - Creating a poll (Will contain username and id of creator, and message id of the resulting poll)
+    - Voting in a poll (Will contain username and id of voter, option voted for, and message id of the poll)
+    - Attempting to vote in a non-multiple-votes poll (Will contain username and id of voter)
+    - When a poll ends (Will contain message id of the poll that ended)
