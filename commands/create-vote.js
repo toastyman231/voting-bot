@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, ComponentType, ButtonBuilder, ButtonStyle, ActionRowBuilder, Client, BaseInteraction, InteractionType } = require('discord.js');
-const path = require('node:path');
 const fs = require('node:fs');
 
 votesList = [];
@@ -13,6 +12,14 @@ module.exports = {
             option.setName("prompt")
                 .setDescription("The prompt which users will be voting on.")
                 .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName("timeout")
+                .setDescription("How long before the vote ends? (In seconds)")
+                .setRequired(true))
+        .addBooleanOption(option =>
+            option.setName("allow-multiple-votes")
+            .setDescription("Should the poll allow users to vote more than once?")
+            .setRequired(true))
         .addStringOption(option => 
             option.setName("option1")
                 .setDescription("The first option")
@@ -36,7 +43,7 @@ module.exports = {
         random = Math.random();
         hashCode = hash(interaction.options.getString('prompt') + random);
 
-        votesList.push(new Vote(hashCode));
+        votesList.push(new Vote(hashCode, interaction.options.getBoolean("allow-multiple-votes")));
 
         const op1 = new ButtonBuilder()
                 .setCustomId(hashCode + '-option1')
@@ -81,51 +88,70 @@ module.exports = {
             labels.push(interaction.options.getString('option4'));
         }
 
-        const msg = await interaction.reply({content: interaction.options.getString('prompt'), components: [row] });
+        multiVotes = interaction.options.getBoolean("allow-multiple-votes");
 
-        const collector = await msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 15000});
+        //console.log(interaction.options.getString('prompt') + (multiVotes ? " (Allows multiple votes)" : ""));
+        const msg = await interaction.reply({content: interaction.options.getString('prompt') + (multiVotes ? " (Allows multiple votes)" : ""), components: [row] });
+
+        Logger.write(logPath, interaction.user.username + "(" + interaction.user.id + ")" + " created a new poll. ID: " + msg.id);
+
+        const collector = await msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: interaction.options.getInteger("timeout") * 1000});
 
         collector.on('collect', async i => {
             votesList.forEach(async element => {
                 //console.log(element.users);
                 if (i.customId.includes(element.id)) {
                     voteIndex = votesList.indexOf(element);
-                    if (element.users.includes(i.user.id)) {
-                        //console.log(i);
-                        //await interaction.followUp({ content: "You already voted on this poll!", ephemeral: true });
-                    } else {
-                        if (i.customId.includes('option1')) {
-                            element.votes[0]++;
-                        } else if (i.customId.includes('option2')) {
-                            element.votes[1]++;
-                        } else if (i.customId.includes('option3')) {
-                            element.votes[2]++;
-                        } else if (i.customId.includes('option4')) {
-                            element.votes[3]++;
-                        }
-                        
-                        index = 0;
-                        row.components.forEach(element1 => {
-                            tempIndex = index;
-                            if (row.components.length == 3 && index == 2) tempIndex = 3;
-                            element1.setLabel(labels[index] + " (Votes: " + element.votes[tempIndex] + ")");
-                            //element1.setDisabled(true);
-                            index++;
-                        });
-                        element.users.push(i.user.id);
-                        await interaction.editReply({ content: interaction.options.getString('prompt'), components: [row] });
+
+                    if (!interaction.options.getBoolean("allow-multiple-votes") && element.users.includes(i.user.id)) return;
+
+                    logIndex = 0;
+
+                    if (i.customId.includes('option1')) {
+                        element.votes[0]++;
+                    } else if (i.customId.includes('option2')) {
+                        element.votes[1]++;
+                        logIndex = 1;
+                    } else if (i.customId.includes('option3')) {
+                        element.votes[2]++;
+                        logIndex = 2;
+                    } else if (i.customId.includes('option4')) {
+                        element.votes[3]++;
+                        logIndex = 3;
                     }
+                    
+                    index = 0;
+                    row.components.forEach(element1 => {
+                        tempIndex = index;
+                        if (row.components.length == 3 && index == 2) tempIndex = 3;
+                        element1.setLabel(labels[index] + " (Votes: " + element.votes[tempIndex] + ")");
+                        //element1.setDisabled(true);
+                        index++;
+                    });
+
+                    Logger.write(logPath, interaction.user.username + "(" + interaction.user.id + ")" + " voted for " + labels[logIndex] + " on poll " + msg.id);
+
+                    element.users.push(i.user.id);
+                    await interaction.editReply({ content: interaction.options.getString('prompt') + (multiVotes ? " (Allows multiple votes)" : ""), components: [row] });
                 }
             });
         });
+
+        collector.on('end', async i => {
+            Logger.write(logPath, "Poll " + msg.id + " ended.");
+
+            await interaction.editReply({ content: "This poll has ended! Original prompt: " + 
+                        interaction.options.getString('prompt') + (interaction.options.getBoolean("allow-multiple-votes") ? " (Allows multiple votes)" : ""), components: [row] });
+        })
 	},
 };
 
 class Vote {
-    constructor(code) {
+    constructor(code, allow) {
         this.id = code;
         this.votes = [0,0,0,0];
         this.users = [];
+        this.allowMultiple = allow;
     }
 }
 
