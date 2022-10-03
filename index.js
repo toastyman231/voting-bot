@@ -86,13 +86,16 @@ async function readLog(path) {
 
 async function writeLog(path, newData) {
     var today = new Date();
+    var date = today.getMonth().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false}) + "-" +
+                today.getDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false}) + "-" +
+                today.getFullYear() + " ";
     var time = today.getHours().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false}) + ":" + 
             today.getMinutes().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false}) + ":" + 
             today.getSeconds().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
 
     //console.log(readLog(path));
     previous = await readLog(path);
-    fs.writeFile(logPath, previous + time + " - " + newData + "\n", (err) => {if (err) throw err});
+    fs.writeFile(logPath, previous + date + time + " - " + newData + "\n", (err) => {if (err) throw err});
     //console.log("wrote file: " + newData);
 }
 

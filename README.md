@@ -51,5 +51,5 @@ CLIENT_ID="Your client id here"
 - Logs are currently output for:
     - Creating a poll (Will contain username and id of creator, and message id of the resulting poll)
     - Voting in a poll (Will contain username and id of voter, option voted for, and message id of the poll)
-    - Attempting to vote in a non-multiple-votes poll (Will contain username and id of voter)
+    - Attempting to vote in a non-multiple-votes poll they already voted on (Will contain username and id of voter)
     - When a poll ends (Will contain message id of the poll that ended)
