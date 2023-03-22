@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   votingbot:
+    image: toastyman231/votingbot:latest
     container_name: votingbot
     build:
       context: .

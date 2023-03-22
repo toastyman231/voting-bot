@@ -45,6 +45,9 @@ CLIENT_ID="Your client id here"
 9. Go to the link you copied, and invite the bot to any servers you own/moderate.
 10. Enjoy!
 
+If you would like to use docker to host the bot, simply follow the steps above to create your .env file, then copy the docker compose file into the same directory as .env.  
+Then, install docker if needed, and run docker compose up in that directory, and it will pull the image and start the bot.
+
 ## Notes
 - Logs will be output into voting-bot-folder/logs/log.txt. If the directory or file does not exist, both will be created.
 - Currently all logs are dumped into one file. This may change in the future, but it is not currently planned.
