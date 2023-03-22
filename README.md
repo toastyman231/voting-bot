@@ -12,7 +12,7 @@ Simply run the following command:
 **Timeout**: How long the poll will last for, in seconds. Mandatory.  
 **Allow Multiple Votes**: Set to true to allow users to vote multiple times. Mandatory.  
 **Option 1/2**: The first/second option to vote on. Mandatory.  
-**Option 3/4**: The second/third option to vote on. Optional.
+**Option 3/4**: The third/fourth option to vote on. Optional.
 
 # How to Host Your Own Voting Bot
 1. Install node.js and npm. I recommend at least node version 16.x, as that is the only version I have confirmed it works on.
